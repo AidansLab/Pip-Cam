@@ -28,7 +28,7 @@ SPDX-License-Identifier: CC0-1.0
 #include <usb/usb_host.h>
 
 #ifndef USBHOSTSERIAL_BUFFERSIZE
-  #define USBHOSTSERIAL_BUFFERSIZE 256
+  #define USBHOSTSERIAL_BUFFERSIZE 4096
 #endif
 
 typedef void (*USBHostSerialLoggerFunc)(const char*);
