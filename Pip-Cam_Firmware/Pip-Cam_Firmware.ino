@@ -77,7 +77,7 @@ unsigned long packetSentTime = 0; // Timeout for ACK waiting
 const unsigned long ACK_TIMEOUT = 2000; // 2 second timeout for ACK
 
 // Power indicator pin
-const int powerPin = D5;
+const int powerPin = D4;
 #define WAKEUP_GPIO GPIO_NUM_4
 
 void setup() {
@@ -147,12 +147,15 @@ void setup() {
   // Set WAKEUP_GPIO as input with pulldown for button reading
   pinMode(WAKEUP_GPIO, INPUT_PULLDOWN);
   
-  // Set D5 high to indicate power on
+  // Set D5 high to power on USB
   pinMode(powerPin, OUTPUT);
   digitalWrite(powerPin, HIGH);
 
   currentState = STATE_WAIT_USB;
   lastActivity = millis();
+  
+  // Log boot marker
+  logDebug("=== ESP32 BOOT ===");
 }
 
 // Send a packet using the Espruino protocol
@@ -183,6 +186,34 @@ int checkAck() {
   return 0;
 }
 
+// Log to file on ESP32
+void logDebug(const char* message) {
+  File logFile = LittleFS.open("/debug.log", FILE_APPEND);
+  if (logFile) {
+    logFile.printf("[%lu] %s\n", millis(), message);
+    logFile.close();
+  }
+}
+
+void logDebugf(const char* format, ...) {
+  char buffer[256];
+  va_list args;
+  va_start(args, format);
+  vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
+  logDebug(buffer);
+}
+
+// Log error with state and progress info
+void logError(const char* errorType, const char* stateName) {
+  File logFile = LittleFS.open("/debug.log", FILE_APPEND);
+  if (logFile) {
+    logFile.printf("[%lu] ERROR: %s in %s (offset=%u, total=%u)\n", 
+                   millis(), errorType, stateName, uploadOffset, imageData.size());
+    logFile.close();
+  }
+}
+
 void goToDeepSleep() {
   // 1. Put OV3660 into software standby
   sensor_t * s = esp_camera_sensor_get();
@@ -193,7 +224,7 @@ void goToDeepSleep() {
   }
   delay(10); // Give the sensor a moment to power down
 
-  // 2. Turn off the power indicator pin
+  // 2. Turn off the USB power
   digitalWrite(powerPin, LOW);
 
   delay(100);
@@ -209,7 +240,7 @@ void goToDeepSleep() {
 void loop() {
   switch (currentState) {
     case STATE_WAIT_USB:
-      // Check for USB connection timeout (30 seconds)
+      // Check for USB connection timeout (10 seconds)
       if (millis() - lastActivity > 10000) {
         goToDeepSleep();
       }
@@ -218,31 +249,37 @@ void loop() {
         // We might want to check VID/PID if library supports it, 
         // but for now just assuming connection is enough or library handles it.
         // The simple USBHostSerial check just means "connected".
-        delay(1000); // Give it a moment
-        currentState = STATE_QUERY_DIR;
+        //delay(200); // Give it a moment
+        String cmd = "\x10try{Pip.emit('drawFooter');}catch(e){}\n";
+        usbHost.write((const uint8_t*)cmd.c_str(), cmd.length());
+        currentState = STATE_WAIT_COMMAND;
         lastActivity = millis(); // Reset activity timer
       } else {
-        static unsigned long lastPrint = 0;
-        if (millis() - lastPrint > 1000) {
-          lastPrint = millis();
+        // Blink LED while searching for USB connection
+        static unsigned long lastBlink = 0;
+        if (millis() - lastBlink > 500) {
+          static bool ledState = false;
+          ledState = !ledState;
+          digitalWrite(LED_BUILTIN, ledState);
+          lastBlink = millis();
         }
       }
       break;
 
-    case STATE_QUERY_DIR:
-      {
-        // Ensure IMGS directory exists by trying to create it
-        String cmd = "\x10try{require('fs').mkdir('IMGS');}catch(e){}\n";
-        usbHost.write((const uint8_t*)cmd.c_str(), cmd.length());
-        delay(200);
-        currentState = STATE_WAIT_COMMAND;
-      }
-      break;
-
-    case STATE_WAIT_DIR_RESPONSE:
-      // No longer used - kept for compatibility
-      currentState = STATE_WAIT_COMMAND;
-      break;
+    //case STATE_QUERY_DIR:
+    //  {
+    //    // Ensure IMGS directory exists by trying to create it
+    //    String cmd = "\x10try{require('fs').mkdir('IMGS');}catch(e){}\n";
+    //    usbHost.write((const uint8_t*)cmd.c_str(), cmd.length());
+    //    delay(200);
+    //    currentState = STATE_WAIT_COMMAND;
+    //  }
+    //  break;
+//
+    //case STATE_WAIT_DIR_RESPONSE:
+    //  // No longer used - kept for compatibility
+    //  currentState = STATE_WAIT_COMMAND;
+    //  break;
 
     case STATE_WAIT_COMMAND:
       // Check for timeout
@@ -318,6 +355,14 @@ void loop() {
           isReconvert = true; // This is a reconvert operation
           currentState = STATE_RECONVERT;
         }
+        else if (cmd.indexOf("Gary!") >= 0) {
+          // Handshake from Pip-Boy - respond to confirm connection
+          String response = "\x10" "camConnected = true;\n";
+          usbHost.write((const uint8_t*)response.c_str(), response.length());
+          delay(100);
+          String cmd = "\x10try{Pip.emit('drawFooter');}catch(e){}\n";
+          usbHost.write((const uint8_t*)cmd.c_str(), cmd.length());
+        }
       }
       
       // Always update button state for edge detection, even when processing commands
@@ -388,23 +433,27 @@ void loop() {
         // Apply artificial corruption if requested (only ~20% of the time when enabled)
         if (captureCorrupt && imageData.size() > 200 && random(100) < 20) {
           // Define safe margins from start and end (in bytes)
-          const size_t marginStart = 16000;  // Don't corrupt first 16000 bytes
-          const size_t marginEnd = 16000;    // Don't corrupt last 16000 bytes
-          const size_t minCorrupt = 200;   // Minimum bytes to delete
-          const size_t maxCorrupt = 800;  // Maximum bytes to delete
+          const size_t marginStart = 18000;  // Don't corrupt first 18000 bytes
+          const size_t marginEnd = 10000;    // Don't corrupt last 10000 bytes
+          const size_t minInsert = 20;       // Minimum random chars to insert
+          const size_t maxInsert = 50;      // Maximum random chars to insert
           
           // Calculate safe range
           size_t safeStart = marginStart;
           size_t safeEnd = imageData.size() - marginEnd;
           
-          if (safeEnd > safeStart + maxCorrupt) {
-            // Random corruption length
-            size_t corruptLen = minCorrupt + (random(maxCorrupt - minCorrupt + 1));
-            // Random starting position within safe range
-            size_t corruptStart = safeStart + random(safeEnd - safeStart - corruptLen);
+          if (safeEnd > safeStart) {
+            // Random number of characters to insert
+            size_t insertCount = minInsert + (random(maxInsert - minInsert + 1));
             
-            // Delete bytes by erasing from the vector
-            imageData.erase(imageData.begin() + corruptStart, imageData.begin() + corruptStart + corruptLen);
+            // Insert each random byte at its own random position
+            for (size_t i = 0; i < insertCount; i++) {
+              // Recalculate safe end since we're inserting (it grows each time)
+              size_t currentSafeEnd = imageData.size() - marginEnd;
+              size_t insertPos = safeStart + random(currentSafeEnd - safeStart);
+              uint8_t randomByte = (uint8_t)random(256);
+              imageData.insert(imageData.begin() + insertPos, randomByte);
+            }
           }
         }
 
@@ -526,6 +575,9 @@ void loop() {
         // Build FILE_SEND packet payload with fs:1 to use filesystem (not internal storage)
         String payload = "{fn:\"" + filename + "\",s:" + String(imageData.size()) + ",fs:1}";
         
+        // Log the upload start
+        logDebugf("UPLOAD_START: file=%s size=%u", filename.c_str(), imageData.size());
+        
         // Send FILE_SEND packet
         sendPacket(PKT_FILE_SEND, payload);
         
@@ -540,12 +592,15 @@ void loop() {
         int ack = checkAck();
         if (ack == 1) {
           // ACK received, start sending data chunks
+          logDebug("FILE_SEND ACK received, starting chunks");
           currentState = STATE_UPLOAD_CHUNKS;
         } else if (ack == -1) {
           // NAK received, retry or fail
+          logError("NAK", "STATE_WAIT_FILE_SEND_ACK");
           currentState = STATE_DONE; // Give up for now
         } else if (millis() - packetSentTime > ACK_TIMEOUT) {
           // Timeout, give up
+          logError("TIMEOUT", "STATE_WAIT_FILE_SEND_ACK");
           currentState = STATE_DONE;
         }
       }
@@ -554,7 +609,7 @@ void loop() {
     case STATE_UPLOAD_CHUNKS:
       {
         if (uploadOffset < imageData.size()) {
-          // Calculate chunk size - protocol allows up to 8191 bytes, use 1024 for safety
+          // Calculate chunk size
           const size_t PACKET_CHUNK = 1024;
           size_t remaining = imageData.size() - uploadOffset;
           size_t thisChunkSize = (remaining > PACKET_CHUNK) ? PACKET_CHUNK : remaining;
@@ -598,9 +653,11 @@ void loop() {
           }
         } else if (ack == -1) {
           // NAK received, give up
+          logError("NAK", "STATE_WAIT_DATA_ACK");
           currentState = STATE_DONE;
         } else if (millis() - packetSentTime > ACK_TIMEOUT) {
           // Timeout, give up
+          logError("TIMEOUT", "STATE_WAIT_DATA_ACK");
           currentState = STATE_DONE;
         }
       }
@@ -608,13 +665,22 @@ void loop() {
 
     case STATE_UPLOAD_END:
       {
+        // Log successful upload completion
+        logDebugf("UPLOAD_COMPLETE: %u bytes sent", uploadOffset);
+        
         // Packet protocol handles file completion automatically
         // Just run garbage collection and send update event
         delay(100); // Brief delay to let protocol finish
         
+        // Force garbage collection
         String cmd = "\x10process.memory(true);\n";
         usbHost.write((const uint8_t*)cmd.c_str(), cmd.length());
         delay(100);
+        
+        // Touch filesystem to refresh state (helps prevent NO_PATH errors)
+        cmd = "\x10try{require('fs').statSync('IMGS');}catch(e){}\n";
+        usbHost.write((const uint8_t*)cmd.c_str(), cmd.length());
+        delay(50);
 
         // Send update flag to refresh the image display
         cmd = "\x10Pip.emit('updateImg');\n";
