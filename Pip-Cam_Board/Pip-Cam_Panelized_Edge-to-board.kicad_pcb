@@ -457,7 +457,7 @@
 		(property "Reference" "J2"
 			(at 0 -2.33 90)
 			(layer "F.SilkS")
-			(uuid "814a057f-1415-4623-a0d1-678a057c6e5e")
+			(uuid "5202cb97-d18d-45a5-849b-86d91479a44d")
 			(effects
 				(font
 					(size 1 1)
@@ -468,7 +468,7 @@
 		(property "Value" "USB C Plug"
 			(at 0 12.49 90)
 			(layer "F.Fab")
-			(uuid "37253a35-3294-4e31-a514-dc50d44f9969")
+			(uuid "5aca3276-75ea-4456-9674-8fa615a77d08")
 			(effects
 				(font
 					(size 1 1)
@@ -481,7 +481,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "e2017b0a-a539-4435-9c82-26344f0f32bc")
+			(uuid "823d5c1e-6655-49a5-88ef-5d812eac0334")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -494,7 +494,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "fb2ee782-ade2-4883-81b3-6ed77da3c795")
+			(uuid "bd025cf4-92ba-4276-8f6d-7f2a13517021")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -506,7 +506,7 @@
 		(path "/ddaa7fbe-8c3d-410f-930b-060f1e3879b5")
 		(sheetname "/")
 		(sheetfile "Pip-Cam.kicad_sch")
-		(attr through_hole)
+		(attr through_hole exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start -1.33 11.49)
 			(end 1.33 11.49)
@@ -1086,6 +1086,7 @@
 				)
 			)
 		)
+		(attr exclude_from_pos_files exclude_from_bom)
 		(pad "1" connect rect
 			(at 0 0 180)
 			(size 1.5 1)
@@ -1186,11 +1187,11 @@
 	(footprint ""
 		(layer "F.Cu")
 		(uuid "89fa4bc2-ac62-4087-871b-e1030f9d8312")
-		(at 167.8 77.9)
+		(at 167.8 77.8)
 		(property "Reference" ""
 			(at 0 0 0)
 			(layer "F.SilkS")
-			(uuid "45cf77ea-577c-49a5-851f-9ae191140d3d")
+			(uuid "c68bed48-7bc5-45af-8138-b2fa47894cac")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1201,7 +1202,7 @@
 		(property "Value" ""
 			(at 0 0 0)
 			(layer "F.Fab")
-			(uuid "3a9ec370-344a-4801-9db1-d6635a9bd1de")
+			(uuid "92cba848-46e7-44e8-bf99-96fd50f232c5")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1213,7 +1214,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "ac3d1718-8bd4-4d31-b034-2bfffa794edb")
+			(uuid "5c699a9c-5aaf-41fd-ab90-add3e58e06c8")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1225,7 +1226,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "85eddc3d-1a3c-4e35-9333-3da5a5553b4e")
+			(uuid "6fbc9a4f-3f11-4077-bab5-2ff0bbdad66d")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1233,6 +1234,7 @@
 				)
 			)
 		)
+		(attr exclude_from_bom allow_missing_courtyard)
 		(pad "1" connect rect
 			(at 0 0 180)
 			(size 1.5 1)
@@ -1247,7 +1249,7 @@
 		(at 157.829989 65.75 180)
 		(descr "ALPS 5.2mm Square Low-profile Type (Surface Mount) SKQG Series, With stem, http://www.alps.com/prod/info/E/HTML/Tact/SurfaceMount/SKQG/SKQGAFE010.html")
 		(tags "SPST Button Switch")
-		(property "Reference" "REF**"
+		(property "Reference" "S1"
 			(at 0 -3.6 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -1924,7 +1926,7 @@
 	(footprint ""
 		(layer "F.Cu")
 		(uuid "e44a5258-778c-414e-bf5d-6c2664c77766")
-		(at 147.8 77.9)
+		(at 147.8 77.8)
 		(property "Reference" ""
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1971,6 +1973,7 @@
 				)
 			)
 		)
+		(attr exclude_from_pos_files exclude_from_bom)
 		(pad "1" connect rect
 			(at 0 0 180)
 			(size 1.5 1)
@@ -2039,7 +2042,7 @@
 				(justify mirror)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start 1.33 -1.27)
 			(end 1.33 -1.33)
@@ -2264,6 +2267,7 @@
 				(justify mirror)
 			)
 		)
+		(attr exclude_from_pos_files exclude_from_bom)
 		(pad "1" connect rect
 			(at 0 0 180)
 			(size 1.5 1)
@@ -2282,7 +2286,7 @@
 		(property "Reference" "J1"
 			(at 0 2.33 90)
 			(layer "B.SilkS")
-			(uuid "e9974bdc-0a4b-4fdc-b2ae-fd97897cc9ad")
+			(uuid "1101b553-4955-4dfb-ae11-7e9120647683")
 			(effects
 				(font
 					(size 1 1)
@@ -2294,7 +2298,7 @@
 		(property "Value" "5V Boost"
 			(at 0 -9.95 90)
 			(layer "B.Fab")
-			(uuid "553bfd15-327d-4c65-87d2-17058eb9d4e5")
+			(uuid "aca08113-53d3-4afc-83bf-f456410a4a19")
 			(effects
 				(font
 					(size 1 1)
@@ -2308,7 +2312,7 @@
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "eddb02a2-6067-4014-95f7-2f780d58f80d")
+			(uuid "cc8d5782-f1e5-4aef-9cb6-f495095fa1db")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2322,7 +2326,7 @@
 			(unlocked yes)
 			(layer "B.Fab")
 			(hide yes)
-			(uuid "092d9f4e-f977-4e06-831a-5502ecb5d89b")
+			(uuid "15a504e3-f5db-4dc9-a692-883622f16997")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2335,7 +2339,7 @@
 		(path "/eec4651f-f8eb-4dfe-9153-966bd5e76522")
 		(sheetname "/")
 		(sheetfile "Pip-Cam.kicad_sch")
-		(attr through_hole)
+		(attr through_hole exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start -1.33 1.33)
 			(end 0 1.33)
@@ -2626,7 +2630,7 @@
 				(justify mirror)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start 1.33 -1.27)
 			(end 1.33 -1.33)
@@ -2927,7 +2931,7 @@
 		(path "/0678f735-6976-4de5-bb58-e5cea54be80c")
 		(sheetname "/")
 		(sheetfile "Pip-Cam.kicad_sch")
-		(attr smd)
+		(attr smd exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start -0.5 3.6)
 			(end -0.5 3.6)
@@ -3226,6 +3230,7 @@
 				(justify mirror)
 			)
 		)
+		(attr exclude_from_pos_files exclude_from_bom)
 		(pad "2" connect rect
 			(at 0 0)
 			(size 1.5 1.7)
@@ -3601,6 +3606,7 @@
 				(justify mirror)
 			)
 		)
+		(attr exclude_from_pos_files exclude_from_bom)
 		(pad "1" connect rect
 			(at 0 0)
 			(size 1.5 1.7)
@@ -5205,8 +5211,8 @@
 	)
 	(gr_poly
 		(pts
-			(xy 168.5 78.35) (xy 166.75 78.35) (xy 166.75 80.05) (xy 168.5 80.05) (xy 168.5 113.3) (xy 147.1 113.3)
-			(xy 147.1 80.05) (xy 148.85 80.05) (xy 148.85 78.35) (xy 147.1 78.35) (xy 147.1 63.4) (xy 149.65 60.9)
+			(xy 168.5 78.25) (xy 166.75 78.25) (xy 166.75 80.05) (xy 168.5 80.05) (xy 168.5 113.3) (xy 147.1 113.3)
+			(xy 147.1 80.05) (xy 148.85 80.05) (xy 148.85 78.25) (xy 147.1 78.25) (xy 147.1 63.4) (xy 149.65 60.9)
 			(xy 165.95 60.9) (xy 168.5 63.4)
 		)
 		(stroke
@@ -5219,8 +5225,8 @@
 	)
 	(gr_poly
 		(pts
-			(xy 148.75 73.1) (xy 150.25 73.1) (xy 150.25 68.7) (xy 165.3 68.7) (xy 165.3 73.1) (xy 166.8 73.1)
-			(xy 166.8 76.3) (xy 148.75 76.3)
+			(xy 148.572225 73.1) (xy 150.25 73.1) (xy 150.25 68.7) (xy 165.3 68.7) (xy 165.3 73.1) (xy 167.022797 73.1)
+			(xy 167.022797 76.3) (xy 148.572225 76.3)
 		)
 		(stroke
 			(width 0.05)

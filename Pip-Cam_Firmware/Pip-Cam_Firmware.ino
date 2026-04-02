@@ -1,8 +1,5 @@
 #include "esp_camera.h"
-#include "FS.h"
-#include "LittleFS.h"
 #include "ImageConverter.h"
-#include "img_converters.h" // For frame2jpg
 #include <USBHostSerial.h>
 #include "driver/rtc_io.h"
 #include "hal/usb_serial_jtag_ll.h"
@@ -18,8 +15,8 @@
 // USB Host Configuration
 // ===========================
 USBHostSerial usbHost;
-const uint16_t TARGET_VID = 0x0483; // STM32
-const uint16_t TARGET_PID = 0xA4F1; // Espruino
+//const uint16_t TARGET_VID = 0x0483; // STM32
+//const uint16_t TARGET_PID = 0xA4F1; // Espruino
 
 // ===========================
 // Image Conversion Settings
@@ -82,10 +79,7 @@ const int powerPin = D4;
 
 void setup() {
   
-  // 1. Initialize LittleFS
-  if (!LittleFS.begin(true)) {
-    return;
-  }
+
 
   // 2. Initialize Camera
   camera_config_t config;
@@ -155,7 +149,7 @@ void setup() {
   lastActivity = millis();
   
   // Log boot marker
-  logDebug("=== ESP32 BOOT ===");
+
 }
 
 // Send a packet using the Espruino protocol
@@ -186,33 +180,7 @@ int checkAck() {
   return 0;
 }
 
-// Log to file on ESP32
-void logDebug(const char* message) {
-  File logFile = LittleFS.open("/debug.log", FILE_APPEND);
-  if (logFile) {
-    logFile.printf("[%lu] %s\n", millis(), message);
-    logFile.close();
-  }
-}
 
-void logDebugf(const char* format, ...) {
-  char buffer[256];
-  va_list args;
-  va_start(args, format);
-  vsnprintf(buffer, sizeof(buffer), format, args);
-  va_end(args);
-  logDebug(buffer);
-}
-
-// Log error with state and progress info
-void logError(const char* errorType, const char* stateName) {
-  File logFile = LittleFS.open("/debug.log", FILE_APPEND);
-  if (logFile) {
-    logFile.printf("[%lu] ERROR: %s in %s (offset=%u, total=%u)\n", 
-                   millis(), errorType, stateName, uploadOffset, imageData.size());
-    logFile.close();
-  }
-}
 
 void goToDeepSleep() {
   // 1. Put OV3660 into software standby
@@ -246,9 +214,6 @@ void loop() {
       }
       
       if (usbHost) { // Check if connected
-        // We might want to check VID/PID if library supports it, 
-        // but for now just assuming connection is enough or library handles it.
-        // The simple USBHostSerial check just means "connected".
         //delay(200); // Give it a moment
         String cmd = "\x10try{Pip.emit('drawFooter');}catch(e){}\n";
         usbHost.write((const uint8_t*)cmd.c_str(), cmd.length());
@@ -404,20 +369,7 @@ void loop() {
           return; // Retry?
         }
         
-        // Save as JPEG
-        uint8_t *jpg_buf = NULL;
-        size_t jpg_len = 0;
-        bool jpeg_converted = frame2jpg(fb, 80, &jpg_buf, &jpg_len);
-        
-        if (jpeg_converted) {
-            File file = LittleFS.open("/capture.jpg", FILE_WRITE);
-            if (file) {
-                file.write(jpg_buf, jpg_len);
-                file.close();
-            }
-            free(jpg_buf);
-        } else {
-        }
+
 
         // Convert immediately
         // First crop to 400x208
@@ -457,12 +409,7 @@ void loop() {
           }
         }
 
-        // Save converted image for debug
-        File convertedFile = LittleFS.open("/converted.img", FILE_WRITE);
-        if (convertedFile) {
-            convertedFile.write(imageData.data(), imageData.size());
-            convertedFile.close();
-        }
+
 
         esp_camera_fb_return(fb);
         
@@ -563,20 +510,14 @@ void loop() {
       break;
 
     case STATE_UPLOAD_START:
-      {
-        // Ensure IMGS directory exists
-        String cmd = "\x10try{require('fs').mkdir('IMGS');}catch(e){}\n";
-        usbHost.write((const uint8_t*)cmd.c_str(), cmd.length());
-        delay(200); // Wait for directory creation
-        
+      {        
         // Build filename for the image
         String filename = "IMGS/" + uploadImageTimestamp + ".img";
         
         // Build FILE_SEND packet payload with fs:1 to use filesystem (not internal storage)
         String payload = "{fn:\"" + filename + "\",s:" + String(imageData.size()) + ",fs:1}";
         
-        // Log the upload start
-        logDebugf("UPLOAD_START: file=%s size=%u", filename.c_str(), imageData.size());
+
         
         // Send FILE_SEND packet
         sendPacket(PKT_FILE_SEND, payload);
@@ -592,15 +533,15 @@ void loop() {
         int ack = checkAck();
         if (ack == 1) {
           // ACK received, start sending data chunks
-          logDebug("FILE_SEND ACK received, starting chunks");
+
           currentState = STATE_UPLOAD_CHUNKS;
         } else if (ack == -1) {
           // NAK received, retry or fail
-          logError("NAK", "STATE_WAIT_FILE_SEND_ACK");
+
           currentState = STATE_DONE; // Give up for now
         } else if (millis() - packetSentTime > ACK_TIMEOUT) {
           // Timeout, give up
-          logError("TIMEOUT", "STATE_WAIT_FILE_SEND_ACK");
+
           currentState = STATE_DONE;
         }
       }
@@ -653,11 +594,11 @@ void loop() {
           }
         } else if (ack == -1) {
           // NAK received, give up
-          logError("NAK", "STATE_WAIT_DATA_ACK");
+
           currentState = STATE_DONE;
         } else if (millis() - packetSentTime > ACK_TIMEOUT) {
           // Timeout, give up
-          logError("TIMEOUT", "STATE_WAIT_DATA_ACK");
+
           currentState = STATE_DONE;
         }
       }
@@ -665,8 +606,7 @@ void loop() {
 
     case STATE_UPLOAD_END:
       {
-        // Log successful upload completion
-        logDebugf("UPLOAD_COMPLETE: %u bytes sent", uploadOffset);
+
         
         // Packet protocol handles file completion automatically
         // Just run garbage collection and send update event

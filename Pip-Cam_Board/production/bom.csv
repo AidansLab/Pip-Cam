@@ -1,0 +1,4 @@
+﻿Designator,Footprint,Quantity,Value,LCSC Part #
+R1,0603,1,R100k,
+S1,SW_SPST_SKQG_WithStem,1,SW_SPST_SKQG_WithStem,
+U1,XIAO-ESP32S3-SMD,1,XIAO-ESP32-S3-SMD,
