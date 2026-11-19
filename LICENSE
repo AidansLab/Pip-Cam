@@ -1,0 +1,79 @@
+Pip-Cam
+Copyright (C) 2026 Aidan Lee-Calamera
+
+The Pip-Cam is released under two licences: one for the software and one
+for the hardware. The full texts are in the LICENSES/ directory.
+
+------------------------------------------------------------------------
+Software: GNU General Public License v3.0 or later (GPL-3.0-or-later)
+------------------------------------------------------------------------
+
+Applies to:
+  - Pip-Cam_Firmware/ (all source files)
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+Full text: LICENSES/GPL-3.0.txt
+           <https://www.gnu.org/licenses/gpl-3.0.html>
+
+------------------------------------------------------------------------
+Hardware: CERN Open Hardware Licence Version 2 - Strongly Reciprocal
+          (CERN-OHL-S-2.0)
+------------------------------------------------------------------------
+
+Applies to:
+  - Pip-Cam_Board/ (KiCad schematics, PCB layouts, panel, Gerber,
+    drill and production files, and the Pip-Cam board STEP exports)
+  - Pip-Cam_3D_Files/ (enclosure, button plunger and adapter models)
+  - The documentation: README.md and the Pip-Cam manuals (PDF)
+
+This source describes Open Hardware and is licensed under the
+CERN-OHL-S v2.
+
+You may redistribute and modify this source and make products using it
+under the terms of the CERN-OHL-S v2 (https://ohwr.org/cern_ohl_s_v2.txt).
+
+This source is distributed WITHOUT ANY EXPRESS OR IMPLIED WARRANTY,
+INCLUDING OF MERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A
+PARTICULAR PURPOSE. Please see the CERN-OHL-S v2 for applicable
+conditions.
+
+Source location: https://github.com/AidansLab/Pip-Cam
+
+As per CERN-OHL-S v2 section 4, should you produce hardware based on
+this source, you must where practicable maintain the Source Location
+visible on the external case of the Pip-Cam or other products you make
+using this source.
+
+Full text: LICENSES/CERN-OHL-S-2.0.txt
+
+------------------------------------------------------------------------
+Third-party material (not covered by the licences above)
+------------------------------------------------------------------------
+
+The following files belong to their respective owners and are included
+for reference only:
+  - Pip-Cam_Board/pololu-step-up-step-down-voltage-regulator-s7v8fx.step
+    (Pololu Corporation)
+  - Pip-Cam_Board/5978 USB-C Plug Breakout.step (Adafruit Industries)
+  - Pip-Cam_Board/seeed-studio-xiao-esp32-s3-sense.step (Seeed Studio)
+  - Pip-Cam_Board/SHR-02V-S-B.stp (J.S.T. Mfg. Co.)
+  - Pololu-R6.jpg (product photo by Pololu Corporation, annotated)
+
+Pip-Cam_Firmware/camera_pins.h is derived from the CameraWebServer
+example in Espressif's arduino-esp32 core
+(https://github.com/espressif/arduino-esp32), which is licensed under the
+GNU Lesser General Public License v2.1. LGPL-2.1 section 3 permits
+distributing it under the GPL, as is done here.
+
+Pip-Boy is a trademark of Bethesda Softworks LLC. The Pip-Cam is an
+unofficial accessory and is not affiliated with or endorsed by Bethesda
+Softworks or The Wand Company.

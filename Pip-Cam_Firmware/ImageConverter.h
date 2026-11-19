@@ -1,3 +1,23 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Pip-Cam - image crop, brightness/contrast and dithering to the .img format
+ * Copyright (C) 2026 Aidan Lee-Calamera
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef IMAGE_CONVERTER_H
 #define IMAGE_CONVERTER_H
 
@@ -38,7 +58,13 @@ public:
         float contrastFactor = (259.0f * (contrast + 255.0f)) / (255.0f * (259.0f - contrast));
         int maxVal = (1 << bpp) - 1;
 
+        std::vector<float> errRow(width + 2, 0.0f);
+        std::vector<float> errNext(width + 2, 0.0f);
+
         for (int y = 0; y < height; y++) {
+            errRow.swap(errNext);
+            errNext.assign(width + 2, 0.0f);
+
             uint8_t currentByte = 0;
             int startBit = 8 - bpp;
             int bitShift = startBit;
@@ -48,16 +74,33 @@ public:
                 uint8_t pixel = rawData[idx];
 
                 // Apply Brightness/Contrast
-                int val = applyEffects(pixel, brightness, contrastFactor);
+                float val = (float)pixel + brightness;
+                val = (contrastFactor * (val - 128.0f)) + 128.0f;
+
+                // Add Floyd-Steinberg error
+                int ix = x + 1;
+                val += errRow[ix];
+
+                int clippedVal = max(0, min(255, (int)round(val)));
 
                 // Quantize to 0-maxVal
                 // e.g. 2-bit: 0-255 -> 0-3
-                val = (val * (maxVal + 1)) / 256;
-                if (val > maxVal) val = maxVal;
-                if (val < 0) val = 0;
+                int quantized = (clippedVal * (maxVal + 1)) / 256;
+                if (quantized > maxVal) quantized = maxVal;
+                if (quantized < 0) quantized = 0;
+
+                // Calculate error
+                int outputVal = (quantized * 255) / maxVal;
+                float error = val - outputVal;
+
+                // Distribute error
+                errRow[ix + 1] += error * (7.0f / 16.0f);
+                errNext[ix - 1] += error * (3.0f / 16.0f);
+                errNext[ix] += error * (5.0f / 16.0f);
+                errNext[ix + 1] += error * (1.0f / 16.0f);
 
                 // Pack bits
-                currentByte |= (val << bitShift);
+                currentByte |= (quantized << bitShift);
                 bitShift -= bpp;
 
                 // Byte full? Write it.
@@ -104,11 +147,7 @@ public:
     }
 
 private:
-    static int applyEffects(int val, int brightness, float contrastFactor) {
-        val += brightness;
-        val = (int)((contrastFactor * (val - 128)) + 128);
-        return max(0, min(255, val));
-    }
+    // Effects are applied inline to support float-based error diffusion.
 };
 
 #endif // IMAGE_CONVERTER_H

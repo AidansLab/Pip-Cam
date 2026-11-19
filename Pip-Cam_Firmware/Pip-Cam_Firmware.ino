@@ -1,3 +1,23 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Pip-Cam firmware - XIAO ESP32-S3 Sense camera module for the Pip-Boy
+ * Copyright (C) 2026 Aidan Lee-Calamera
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "esp_camera.h"
 #include "ImageConverter.h"
 #include <USBHostSerial.h>
@@ -23,7 +43,7 @@ USBHostSerial usbHost;
 // ===========================
 #define CONVERT_BRIGHTNESS 0
 #define CONVERT_CONTRAST 0
-#define CONVERT_BPP 4
+#define CONVERT_BPP 2
 
 // ===========================
 // State Machine
